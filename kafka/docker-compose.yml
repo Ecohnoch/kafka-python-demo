@@ -2,6 +2,8 @@ version: '3.1'
 services:
   demo_zookeeper:
     build: ./demo_zookeeper
+    networks:
+      - demo_kafka
     ports:
       - "2181:2181"
 
@@ -12,9 +14,12 @@ services:
     restart: always
     depends_on:
       - demo_zookeeper
-    links:
-      - demo_zookeeper
+    networks:
+      - demo_kafka
     environment:
       KAFKA_ZOOKEEPER_CONNECT: demo_zookeeper:2181
       KAFKA_ADVERTISED_HOST_NAME: localhost
       KAFKA_CREATE_TOPICS: "demo1:1:1,demo2:2:1,demo3:4:1"
+
+networks: 
+  demo_kafka:
