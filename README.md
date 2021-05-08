@@ -14,23 +14,22 @@ docker-compose可以直接用pip install docker-compose即可。
 
 然后cd到本目录下的kafka中，使用docker-compose up构建zookeeper和kafka镜像并且启动容器。
 
-启动后进入kafka容器的命令行，运行：
+默认的情况下，docker-compose启动后，kafka会创建三个topic，分别是demo1, demo2和demo3，分区分别是1，2，4，这里的配置在docker-compose.yml中用一个环境变量来代替：
 
-```shell
-/bin/bash setup.sh
-```
-
-setup.sh的内容如下，也可以手动输入，主要是构建三个demo的主题（topic）。
-
-```shell
-#!/bin/bash
-cd /opt/kafka/bin
-echo "setup kafka!!!!"
-#kafka-server-start.sh ../config/server.properties
-kafka-topics.sh --create --zookeeper demo_zookeeper:2181 --replication-factor 1 --partitions 1 --topic demo1
-kafka-topics.sh --create --zookeeper demo_zookeeper:2181 --replication-factor 1 --partitions 2 --topic demo2
-kafka-topics.sh --create --zookeeper demo_zookeeper:2181 --replication-factor 1 --partitions 4 --topic demo3
-kafka-topics.sh --zookeeper demo_zookeeper:2181 --list
+```YAML
+  demo_kafka:
+    build: ./demo_kafka
+    ports:
+      - "9092:9092"
+    restart: always
+    depends_on:
+      - demo_zookeeper
+    links:
+      - demo_zookeeper
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: demo_zookeeper:2181
+      KAFKA_ADVERTISED_HOST_NAME: localhost
+      KAFKA_CREATE_TOPICS: "demo1:1:1,demo2:2:1,demo3:4:1"
 ```
 
 ### 第二步、测试demo1
